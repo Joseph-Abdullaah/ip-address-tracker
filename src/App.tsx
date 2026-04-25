@@ -1,15 +1,26 @@
-import { SearchBar } from "@/components/ip-tracker/search-bar"
-import { StatsCard } from "@/components/ip-tracker/stats-card"
-import { TrackerMapPanel } from "@/components/ip-tracker/tracker-map-panel"
-
-const STATS = [
-  { label: "IP Address", value: "192.212.174.101" },
-  { label: "Location", value: "Brooklyn, NY 10001" },
-  { label: "Timezone", value: "UTC -05:00" },
-  { label: "ISP", value: "SpaceX Starlink" },
-]
+import { SearchBar } from "@/components/search-bar"
+import { StatsCard, type StatsCardItem } from "@/components/stats-card"
+import { TrackerMapPanel } from "@/components/tracker-map-panel"
+import { useIpLookup } from "@/hooks/useIpLookup"
 
 export default function App() {
+  const { data, search } = useIpLookup()
+
+  const stats: StatsCardItem[] = [
+    { label: "IP Address", value: data?.ip ?? "--" },
+    {
+      label: "Location",
+      value: data
+        ? `${data.location.city}, ${data.location.region} ${data.location.postalCode}`.trim()
+        : "--",
+    },
+    {
+      label: "Timezone",
+      value: data ? `UTC ${data.location.timezone}` : "--",
+    },
+    { label: "ISP", value: data?.isp ?? "--" },
+  ]
+
   return (
     <div className="min-h-svh bg-background">
       <header className="relative">
@@ -31,13 +42,13 @@ export default function App() {
           <h1 className="text-center text-3xl font-semibold tracking-tight text-primary-foreground md:text-4xl">
             IP Address Tracker
           </h1>
-          <SearchBar />
+          <SearchBar search={search} />
         </div>
       </header>
 
-      <main className="relative z-20 mx-auto -mt-32 flex max-w-6xl flex-col gap-6 px-6 pb-6 md:-mt-22 md:gap-8">
-        <StatsCard items={STATS} />
-        <TrackerMapPanel />
+      <main className="relative z-20 mx-auto -mt-32 flex  flex-col gap-6 px-6 pb-6 md:-mt-22 md:gap-8">
+        <StatsCard items={stats} />
+        <TrackerMapPanel location={data?.location ?? null} />
       </main>
     </div>
   )
